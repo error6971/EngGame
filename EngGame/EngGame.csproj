@@ -41,8 +41,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GameData.cs" />
     <Compile Include="Eng.cs" />
-    <Compile Include="Player.cs" />
+    <Compile Include="Ludo.cs" />
+    <Compile Include="Information.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
