@@ -6,8 +6,9 @@ using System;
 
 namespace EngGame
 {
-    internal class Eng
+    public class Eng
     {
+
         /// <summary>
         /// The Base Eng Class
         /// </summary>
@@ -15,14 +16,17 @@ namespace EngGame
         #region Public prop
 
         public Confing GameInfo { get; set; } 
-        public int turn { private set; get; }
+        public int Gameturn { private set; get; }
+
+        public GameStatus Status { get; private set; } 
 
         public Random RandomSystem;
+
         #endregion
 
         #region Private prop
 
-        private Confing _Confing;
+        public Confing _Confing { get; private set; }
         private const int RedChance = 35;//the chance of getting red in the carts
 
         #endregion
@@ -41,11 +45,11 @@ namespace EngGame
                         Player.Token = RandomSystem.Next(1, 200);//only for test !!!!
                         Player.Location = i;
                         Player.LocationColor = (LocationColor)i;
-
+                        Player.Tiles = new Tile[_Confing.PlayerStartCartCount];
                         for (int c = 0; c < _Confing.PlayerStartCartCount; c++)
                         {
                             //Create The Begining Cart At Start
-                            Player.Carts[i] = CreateCart();
+                            Player.Tiles[i] = CreateTile();
                         }
                         _Confing.Players[i] = Player;
 
@@ -60,6 +64,7 @@ namespace EngGame
             GameData.Players = gameinfo.Players;
             _Confing = gameinfo;
             RandomSystem = new Random(Guid.NewGuid().GetHashCode());
+            Status = new GameStatus();
         }
 
         
@@ -75,39 +80,62 @@ namespace EngGame
             }
         }
 
-        public Cart CreateCart()
+        public Tile CreateTile()
         {
             byte color = 0;
 
-            Cart cart = new Cart();
+            Tile cart = new Tile();
 
             
 
-            if (RedChance >= RandomSystem.Next(100))//chane  of getting red
+            if (RedChance >= RandomSystem.Next(100))//chance  of getting red
                 color = 1;
             else
                 color = 0;
 
-            cart.color = (CartColor)color;
+            cart.color = (TileColor)color;
 
 
             return cart;
         }
         
+        public void StartTurn()
+        {
+            Gameturn = 1;
+            SetPlayerTurn(0);
+
+        }
+        
+        public void SetPlayerTurn(int PlayerIndex)
+        {
+            _Confing.Players[PlayerIndex].IsTurn = true;
+            Status.PlayerTurnIndex = PlayerIndex;
+        }
+
+        public void Betting()
+        {
+            foreach (var player in _Confing.Players)
+            {
+
+            }
+        }
+
         #endregion
 
         #region Private metod
 
         private void Start()
         {
-            Confing gameInfo = new Confing();
+            //Confing gameInfo = new Confing();
             // gameinfo.everyting = someting
-            CheckPlayers(gameInfo.Players);
+            CheckPlayers(GameInfo.Players);
 
-            Setup(gameInfo);
+            Setup(GameInfo);
 
 
             StartGame();
+            Betting();
+            
         }//only for test
 
         #endregion
@@ -122,6 +150,11 @@ namespace EngGame
 
         }
 
+        public class GameStatus
+        {
+            public int PlayerTurnIndex { set; get; } = 0;
+            
+        }
         #endregion
 
         #region Private Class
