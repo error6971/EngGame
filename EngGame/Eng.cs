@@ -15,7 +15,6 @@ namespace EngGame
 
         #region Public prop
 
-        public Confing GameInfo { get; set; } 
         public int Gameturn { private set; get; }
 
         public GameStatus Status { get; private set; } 
@@ -28,7 +27,10 @@ namespace EngGame
 
         public Confing _Confing { get; private set; }
         private const int RedChance = 35;//the chance of getting red in the carts
+        public Betstatus betstatus { get; private set; }
 
+
+        private bool LockBet;//for Betting Function
         #endregion
 
         #region Public metod
@@ -62,12 +64,17 @@ namespace EngGame
         public void Setup(Confing gameinfo)
         {
             GameData.Players = gameinfo.Players;
+            GameData.PlayersBetAmount = new int[gameinfo.PlayerCount];
             _Confing = gameinfo;
             RandomSystem = new Random(Guid.NewGuid().GetHashCode());
             Status = new GameStatus();
+            betstatus = new Betstatus();
         }
 
-        
+        public void StartTiling()
+        {
+            
+        }
 
         public void CheckPlayers(Player[] Players)
         {
@@ -82,12 +89,11 @@ namespace EngGame
 
         public Tile CreateTile()
         {
-            byte color = 0;
-
             Tile cart = new Tile();
 
-            
 
+
+            byte color;
             if (RedChance >= RandomSystem.Next(100))//chance  of getting red
                 color = 1;
             else
@@ -105,38 +111,94 @@ namespace EngGame
             SetPlayerTurn(0);
 
         }
-        
-        public void SetPlayerTurn(int PlayerIndex)
+        public int NextPlayer(int currentPLayer = -1 )
         {
-            _Confing.Players[PlayerIndex].IsTurn = true;
-            Status.PlayerTurnIndex = PlayerIndex;
-        }
-
-        public void Betting()
-        {
-            foreach (var player in _Confing.Players)
+            if (currentPLayer <= 0)
             {
 
+                if (Status.PlayerTurnIndex == _Confing.Players.Length - 1)
+                    return 0;
+
+                return Status.PlayerTurnIndex + 1;
             }
+            else
+            {
+                if (currentPLayer == _Confing.Players.Length - 1)
+                    return 0;
+
+                return currentPLayer + 1;
+            }
+            
+        }
+        public int PreviousPlayer(int currentPLayer = -1)
+        {
+            if(currentPLayer <= 0)
+            {
+
+                if (Status.PlayerTurnIndex == 0)
+                    return _Confing.Players.Length - 1;
+
+                return Status.PlayerTurnIndex - 1;
+            }
+            else
+            {
+                if (currentPLayer == 0)
+                    return _Confing.Players.Length - 1;
+
+                return currentPLayer - 1;
+            }
+
+
+           
+        }
+        public void SetPlayerTurn(int PlayerIndex)
+        {
+            if (_Confing.Players.Length > PlayerIndex)
+            {
+                _Confing.Players[PlayerIndex].IsTurn = true;
+              
+                _Confing.Players[PreviousPlayer()].IsTurn = false;
+                Status.PlayerTurnIndex = PlayerIndex;
+
+
+            }
+            else
+            {
+                SetPlayerTurn(0);
+            }
+        }
+
+        public void Betting(int amount)
+        {
+            if (!LockBet)
+            {
+                Player player = _Confing.Players[Status.PlayerTurnIndex];
+
+                if (betstatus.SetBet(amount, player) == 1)
+                {
+                    player.Token -= amount;
+                    Status.AllTokenInTable += amount;
+                    GameData.PlayersBetAmount[Status.PlayerTurnIndex] = amount;
+                    if (betstatus.PlayerBetCount == _Confing.PlayerCount)
+                    {
+                        LockBet = true;
+                        StartTiling();
+                    }
+                    SetPlayerTurn(NextPlayer());
+                    Console.WriteLine("set bet " + amount + player.Name);
+                }
+                else { Console.WriteLine("Problem in Betting"); };
+
+
+            }
+            else Console.WriteLine("Betting is locked");
         }
 
         #endregion
 
         #region Private metod
 
-        private void Start()
-        {
-            //Confing gameInfo = new Confing();
-            // gameinfo.everyting = someting
-            CheckPlayers(GameInfo.Players);
 
-            Setup(GameInfo);
-
-
-            StartGame();
-            Betting();
-            
-        }//only for test
 
         #endregion
 
@@ -153,6 +215,7 @@ namespace EngGame
         public class GameStatus
         {
             public int PlayerTurnIndex { set; get; } = 0;
+            public int AllTokenInTable { get; set; }
             
         }
         #endregion

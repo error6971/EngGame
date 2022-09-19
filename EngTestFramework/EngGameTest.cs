@@ -1,8 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Configuration;
 using EngGame;
 using EngGame.Information;
+using System.Collections;
+using System.Collections.Generic;
+using System.Timers;
 
 namespace EngTestFramework
 {
@@ -33,11 +34,19 @@ namespace EngTestFramework
             game.CheckPlayers(confing.Players);
             game.Setup(confing);
             game.StartGame();
-            game.Betting();
-
+            game.StartTurn();
+            game.Betting(3);
+            game.Betting(7); 
+            game.Betting(1); 
+            game.Betting(0);
+            game.Betting(0);
+            game.Betting(0);
+            
 
             //Assert
             Assert.AreNotEqual(game._Confing.Players[0].Tiles, game._Confing.Players[1].Tiles);
+          
         }
+
     }
 }
