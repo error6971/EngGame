@@ -43,7 +43,6 @@
   <ItemGroup>
     <Compile Include="GameData.cs" />
     <Compile Include="Eng.cs" />
-    <Compile Include="Ludo.cs" />
     <Compile Include="Information.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

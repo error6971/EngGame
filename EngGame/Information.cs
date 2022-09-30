@@ -17,7 +17,8 @@ namespace EngGame
             public int Token { get; set; } = 0;
             public int Location { get; set; }//the turn of player
             public LocationColor LocationColor { get; set; }
-            public Tile[] Tiles { get; set; }
+
+            public TilePack TilePack { get; set; }
 
             public bool IsTurn { get; set; }
             public Player PlayerSetup(int Id, string name, int token = 100)
@@ -28,7 +29,11 @@ namespace EngGame
                 return this;
             }
         }
+        public class TilePack
+        {
 
+            public Tile[] Tiles { get; set; }
+        }
         public class  Betstatus 
         {
             public Betstatus()
@@ -65,6 +70,7 @@ namespace EngGame
                         {
                             place[i].AssignedTo = player;
                             PlayerBetCount += 1;
+                            
                             return 1;
                            
                         }
@@ -101,8 +107,13 @@ namespace EngGame
             public Player AssignedTo { get; set; } = null;
         }
 
+        public class Table
+        {
+            public Player AssignedTo { get; set; } = null;
+            public System.Collections.Generic.List<Tile> Tile { get; set; }
 
-        public static class Extensions
+        }
+        public static class Extensions 
         {
             public static int FindIndex<T>(T[] arr, Predicate<T> predicate)
             {
@@ -114,6 +125,27 @@ namespace EngGame
                     }
                 }
                 return -1;
+            }
+            public static void EqualsCount<T>(T[] arr, Predicate<T> predicate , ref int count)
+            {
+                for (int i = 0; i < arr.Length; i++)
+                {
+                    if (predicate.Invoke(arr[i]))
+                    {
+                        count++;
+                    }
+                }
+                
+            }
+            public static void RemoveAt<T>(ref T[] arr, int index)
+            {
+                for (int a = index; a < arr.Length - 1; a++)
+                {
+                    // moving elements downwards, to fill the gap at [index]
+                    arr[a] = arr[a + 1];
+                }
+                // finally, let's decrement Array's size by one
+                Array.Resize(ref arr, arr.Length - 1);
             }
         }
     }
