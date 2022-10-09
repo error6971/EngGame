@@ -15,7 +15,7 @@ namespace EngTestFramework
         private Eng.PlayerStatus[] playerStatus;
         private Eng Game;
         private int PlayerTurn;
-
+        private Random random => new Random(Guid.NewGuid().GetHashCode());
         public void Init()
         {
             
@@ -26,7 +26,7 @@ namespace EngTestFramework
         }
         [TestMethod]
         
-        public void TestMethod1()
+        public void Turn1()
         {
 
 
@@ -37,24 +37,28 @@ namespace EngTestFramework
 
             Eng.Confing confing = new Eng.Confing();
 
-            confing.PlayerCount = 4;
+            confing.PlayerCount = 6;
 
-            confing.Players = new EngGame.Information.Player[4];
-            confing.Players[0] = new EngGame.Information.Player().PlayerSetup(1,"Reza",80);
-            confing.Players[1] = new EngGame.Information.Player().PlayerSetup(2, "ali", 120);
-            confing.Players[2] = new EngGame.Information.Player().PlayerSetup(3, "mohamad", 60);
-            confing.Players[3] = new EngGame.Information.Player().PlayerSetup(4, "fateme", 95);
+            confing.Players = new Player[6];
+            confing.Players[0] = new Player().PlayerSetup(1,"Reza",80);
+            confing.Players[1] = new Player().PlayerSetup(2, "ali", 120);
+            confing.Players[2] = new Player().PlayerSetup(3, "mohamad", 60);
+            confing.Players[3] = new Player().PlayerSetup(4, "fateme", 95);
+            confing.Players[4] = new Player().PlayerSetup(5, "aref", 95);
+            confing.Players[5] = new Player().PlayerSetup(6, "gasem", 100);
             confing.PlayerStartCartCount = 5;
 
             //Act
-
+            int[] bets = { 0, 0, 0, 1, 3, 7, 11, 15, 17, 20 }; 
             Game.CheckPlayers(confing.Players);
-            Game.Setup(confing);
-
-            Game.StartTurn();
+            Game.Setup(confing,bets);
+            
+           
             Game.Betting(3);
+            Game.Betting(12);
+            Game.Betting(20);
             Game.Betting(7);
-            Game.Betting(1);
+            Game.Betting(0);
             Game.Betting(0);
 
 
@@ -72,15 +76,34 @@ namespace EngTestFramework
 
             RaiseTakeover(2);
             RaiseTakeover(0);
-            RaiseTakeover(4);
-            RaiseTakeover(10);
-            RaiseTakeover(6);
-            RaiseTakeover(8);
-            RaiseTakeover(9);
+            RaiseTakeover(0);
+            RaiseTakeover(0);
+            RaiseTakeover(0);
+            RaiseTakeover(0);
+            RaiseTakeover(0);
 
+            var Tabletile = Game.ReturnInTableTiles();
+
+            bool Continue = true;
+            while (Continue) {
+
+                int TableIndex = random.Next(0, Tabletile.Length);
+
+                int TileIndex = random.Next(0, Tabletile[TableIndex].Tiles.Length);
+
+                Continue = Game.TakeOverTiles(TableIndex, TileIndex);
+                if(Continue)
+                    Console.WriteLine("White Cart");
+                else
+                    Console.WriteLine("red Cart");
+            }
+            
 
             TilePack[] playerTiles = Game.ReturnTiles();
-            Console.WriteLine("player " + Game._Confing.Players[Game.Status.TakeOverTilePlayerIndex].Name+" win the raise up with :" +Game.order.HighestRaiseUp+" cart");
+            Console.WriteLine("player " + Game._Confing.Players[Game.Status.TakeOverTilePlayerIndex].Name+" win the raise up with :" +Game.Status.HighestRaiseUp+" cart");
+
+
+
             for (int i = 0; i < playerTiles.Length; i++)
             {
 
@@ -102,11 +125,39 @@ namespace EngTestFramework
                 }
                 
             }
-            //Assert
-            Assert.AreNotEqual(Game._Confing.Players[0].TilePack.Tiles, Game._Confing.Players[1].TilePack.Tiles);
-          
-       }
 
+            Game.StartNextTurn();
+            //Assert
+            Game.Betting(0);
+            Game.Betting(1);
+            Game.Betting(7);
+            Game.Betting(3);
+            Game.Betting(12);
+            Game.Betting(1);
+           
+            TilePack[] tiles = Game.ReturnTiles();
+            for (int i = 0; i < Game._Confing.Players.Length; i++)
+            {
+               
+
+                for (int c = 0; c < random.Next(1, 3); c++)
+                {
+                    int a = random.Next(0, 0);
+                    Game.ChoiceTile(a);
+                  
+                }
+            }
+            Game.StopChoicingTile();
+
+           Game.RaiseTakeOverTile(2);
+            RaiseTakeover(3);
+            RaiseTakeover(4);
+            RaiseTakeover(6);
+            RaiseTakeover(8);
+            RaiseTakeover(10);
+            RaiseTakeover(12);
+        }
+ 
 
     
         public void Update()
